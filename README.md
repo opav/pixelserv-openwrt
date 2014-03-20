@@ -7,6 +7,7 @@ pixelserv is meant to be run in routers together with a list of blocked adserver
 
 This release is built with Openwrt toolchain and have been tested on Atheros-based routers like TP-Link WR1043N running Openwrt and Gargoyle firmwares.
 
+- https://github.com/opav/pixelserv-openwrt/releases
 
 Installation
 ====
