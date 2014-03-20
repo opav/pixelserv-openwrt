@@ -4,10 +4,10 @@
 * single pixel http string from http://proxytunnel.sourceforge.net/pixelserv.php
 */
 
-#define VERSION "V34"
+#define VERSION "V34.1"
 
 #define BACKLOG 30	// how many pending connections queue will hold
-#define CHAR_BUF_SIZE 1023	//surprising how big requests can be with cookies etc
+#define CHAR_BUF_SIZE 2048	//surprising how big requests can be with cookies and lengthy yahoo url!
 
 #define DEFAULT_IP "0.0.0.0"	// default IP address = all
 #define DEFAULT_PORT "80"	// the default port users will be connecting to
@@ -263,7 +263,7 @@ int main (int argc, char *argv[]) // program start
 #endif
 	int rv;
 	char ip_addr[INET_ADDRSTRLEN] = DEFAULT_IP;
-	int use_ip = 0;	
+	int use_ip = 0;
 	char buf[CHAR_BUF_SIZE + 1];
 
 #ifdef PORT_MODE
@@ -595,7 +595,7 @@ static unsigned char SSL_no[] =
 #endif
 		|| ( bind(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) != OK )
 		|| ( listen(sockfd, BACKLOG) != OK ) ) {
-		syslog(LOG_ERR, "Abort: %m");
+		syslog(LOG_ERR, "Abort: %m - %s %s:%s", ifname, use_ip ? ip_addr : "*", port);
 		exit(EXIT_FAILURE);
 	}
 
@@ -616,7 +616,7 @@ static unsigned char SSL_no[] =
 #endif
 		|| ( bind(sockfd2, servinfo->ai_addr, servinfo->ai_addrlen) != OK )
 		|| ( listen(sockfd2, BACKLOG) != OK ) ) {
-		syslog(LOG_ERR, "Abort: %m");
+		syslog(LOG_ERR, "Abort: %m - %s %s:%s", ifname, use_ip ? ip_addr : "*", SECOND_PORT);
 		exit(EXIT_FAILURE);
 	}
 
@@ -761,7 +761,7 @@ static unsigned char SSL_no[] =
 						MYLOG(LOG_ERR, "null method");
 					} else {
 						TESTPRINT("method: '%s'\n", method);
-						if ( strcasecmp(method, "GET") ) {
+						if ( strcmp(method, "GET") ) {	//methods are case-sensitive
 							MYLOG(LOG_ERR, "unknown method: %s", method);
 							status = SEND_BAD;
 							TESTPRINT("Sending 501 response\n");
@@ -832,7 +832,7 @@ static unsigned char SSL_no[] =
 			{
 				status = SEND_GIF;
 				TESTPRINT("Sending a gif response\n");
-#endif
+#endif	// TEXT_REPLY
 				rv = send(new_fd, response, rsize, 0);
 
 				/* check for error message, but don't bother checking that all bytes sent */
@@ -909,5 +909,7 @@ V31 development - add nullserv responses from https://github.com/flexiondotorg/n
 V32 Add candidate SSL response
 V33 reduce size of gif and png - NOT the same as https://github.com/h0tw1r3/pixelserv which has extra DECODE_URL option
 V34 add MULTIPORT option to also listen by default on https port 443
+ |
+V34.1 minor changes like bigger buffer, added ip/port info in abort msgs etc by opav @ https://github.com/opav/pixelserv-openwrt
 */
 
